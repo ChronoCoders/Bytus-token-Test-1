@@ -1,0 +1,1542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bytus Token Admin Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #3a54ed;
+            --primary-dark: #2a3eb9;
+            --secondary: #5e6ad2;
+            --light: #eef1ff;
+            --dark: #1a1f36;
+            --success: #05c77e;
+            --warning: #ffab2e;
+            --danger: #ff5c5c;
+            --info: #55a3ff;
+            --grey: #f7f9fc;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--grey);
+            color: var(--dark);
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(58, 84, 237, 0.2);
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+        
+        .particle {
+            position: absolute;
+            display: block;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: float 10s infinite ease-in-out;
+        }
+        
+        @keyframes float {
+            0% {
+                transform: translateY(0) translateX(0) rotate(0);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-150px) translateX(150px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+        
+        .header-content {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo-icon {
+            font-size: 2.5rem;
+            margin-right: 15px;
+            background: white;
+            color: var(--primary);
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .logo-text h1 {
+            font-size: 2rem;
+            margin-bottom: 5px;
+        }
+        
+        .logo-text p {
+            opacity: 0.8;
+        }
+        
+        .connection-status {
+            background-color: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 15px 25px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(255, 255, 255, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+            }
+        }
+        
+        .connection-status i {
+            font-size: 1.5rem;
+            margin-right: 10px;
+            color: var(--success);
+        }
+        
+        /* Dashboard Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 20px;
+        }
+        
+        /* Card Styles */
+        .card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+            padding: 25px;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--grey);
+        }
+        
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+        }
+        
+        .card-title i {
+            margin-right: 10px;
+            background: var(--light);
+            color: var(--primary);
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+        }
+        
+        /* Token Info Card */
+        .token-info {
+            grid-column: span 4;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .info-item {
+            padding: 15px;
+            background: var(--light);
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .info-item h3 {
+            font-size: 0.9rem;
+            color: var(--secondary);
+            margin-bottom: 8px;
+        }
+        
+        .info-item p {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+        
+        /* Balance Card */
+        .balance-card {
+            grid-column: span 8;
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+        }
+        
+        .balance-wave {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 50%;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="rgba(255, 255, 255, 0.1)" d="M0,160L48,154.7C96,149,192,139,288,144C384,149,480,171,576,170.7C672,171,768,149,864,154.7C960,160,1056,192,1152,192C1248,192,1344,160,1392,144L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>');
+            background-repeat: no-repeat;
+            background-position: bottom;
+            background-size: cover;
+            animation: wave 10s linear infinite;
+        }
+        
+        @keyframes wave {
+            0% {
+                background-position-x: 0%;
+            }
+            100% {
+                background-position-x: 100%;
+            }
+        }
+        
+        .balance-content {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .balance-info h2 {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-bottom: 10px;
+        }
+        
+        .balance-amount {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+        
+        .balance-address {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px 15px;
+            border-radius: 30px;
+            font-size: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+        }
+        
+        .balance-address i {
+            margin-right: 5px;
+        }
+        
+        .balance-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .balance-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .balance-btn:hover {
+            background: rgba(255, 255, 255,.3);
+            transform: translateY(-2px);
+        }
+        
+        .balance-btn i {
+            margin-right: 8px;
+        }
+        
+        /* Transfer Card */
+        .transfer-card {
+            grid-column: span 6;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #e1e5ee;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .form-control:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(58, 84, 237, 0.2);
+            outline: none;
+        }
+        
+        .input-group {
+            display: flex;
+            align-items: center;
+        }
+        
+        .input-group .form-control {
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+        
+        .input-group-append {
+            background: var(--light);
+            color: var(--primary);
+            padding: 0 15px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            border-top-right-radius: 8px;
+            border-bottom-right-radius: 8px;
+            border: 1px solid #e1e5ee;
+            border-left: none;
+        }
+        
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+        
+        .btn-block {
+            display: block;
+            width: 100%;
+        }
+        
+        /* Approve Card */
+        .approve-card {
+            grid-column: span 6;
+        }
+        
+        /* Admin Controls Card */
+        .admin-card {
+            grid-column: span 12;
+        }
+        
+        .admin-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .admin-btn {
+            padding: 15px;
+            background: var(--light);
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .admin-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+        }
+        
+        .admin-btn i {
+            font-size: 1.5rem;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+        
+        .admin-btn h3 {
+            font-size: 1rem;
+            margin-bottom: 5px;
+        }
+        
+        .admin-btn p {
+            font-size: 0.8rem;
+            color: #6e7191;
+        }
+        
+        /* Burn Card */
+        .burn-card {
+            grid-column: span 6;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .burn-animation {
+            position: absolute;
+            bottom: 0;
+            right: 30px;
+            width: 100px;
+            height: 100px;
+            opacity: 0.1;
+            animation: burn 3s infinite alternate;
+        }
+        
+        @keyframes burn {
+            0% {
+                opacity: 0.1;
+                transform: scale(1);
+            }
+            100% {
+                opacity: 0.3;
+                transform: scale(1.2);
+            }
+        }
+        
+        /* Transaction History */
+        .transaction-card {
+            grid-column: span 6;
+        }
+        
+        .transaction-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .transaction-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--grey);
+        }
+        
+        .transaction-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--light);
+            color: var(--primary);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+        
+        .transaction-details {
+            flex-grow: 1;
+        }
+        
+        .transaction-title {
+            font-weight: 600;
+            margin-bottom: 3px;
+        }
+        
+        .transaction-address {
+            font-size: 0.8rem;
+            color: #6e7191;
+        }
+        
+        .transaction-amount {
+            font-weight: 600;
+        }
+        
+        .transaction-amount.sent {
+            color: var(--danger);
+        }
+        
+        .transaction-amount.received {
+            color: var(--success);
+        }
+        
+        /* Animation for page load */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .animated {
+            animation: fadeIn 0.5s ease forwards;
+        }
+        
+        .delay-1 {
+            animation-delay: 0.1s;
+        }
+        
+        .delay-2 {
+            animation-delay: 0.2s;
+        }
+        
+        .delay-3 {
+            animation-delay: 0.3s;
+        }
+        
+        .delay-4 {
+            animation-delay: 0.4s;
+        }
+        
+        .delay-5 {
+            animation-delay: 0.5s;
+        }
+        
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 30px 0;
+            color: #6e7191;
+            font-size: 0.9rem;
+        }
+        
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .token-info, .balance-card {
+                grid-column: span 6;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .token-info, .balance-card, .transfer-card, .approve-card, .burn-card, .transaction-card {
+                grid-column: span 12;
+            }
+            
+            .header {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .logo {
+                margin-bottom: 20px;
+                justify-content: center;
+            }
+            
+            .connection-status {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .balance-content {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .balance-info {
+                margin-bottom: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header animated">
+            <div class="particles">
+                <span class="particle" style="top: 20%; left: 80%; width: 15px; height: 15px;"></span>
+                <span class="particle" style="top: 60%; left: 20%; width: 20px; height: 20px;"></span>
+                <span class="particle" style="top: 40%; left: 40%; width: 25px; height: 25px;"></span>
+                <span class="particle" style="top: 80%; left: 65%; width: 15px; height: 15px;"></span>
+                <span class="particle" style="top: 10%; left: 30%; width: 20px; height: 20px;"></span>
+            </div>
+            <div class="logo header-content">
+                <div class="logo-icon">
+                    <i class="fas fa-coins"></i>
+                </div>
+                <div class="logo-text">
+                    <h1>Bytus Token</h1>
+                    <p>ERC20 Admin Dashboard</p>
+                </div>
+            </div>
+            <div class="connection-status header-content">
+                <i class="fas fa-check-circle"></i>
+                <div>
+                    <h3>Connected to Contract</h3>
+                    <p>0x5FbDB2315678afecb367f032d93F642f64180aa3</p>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Dashboard Grid -->
+        <div class="dashboard-grid">
+            <!-- Token Info Card -->
+            <div class="card token-info animated delay-1">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <i class="fas fa-info-circle"></i>
+                        Token Information
+                    </h2>
+                </div>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <h3>Symbol</h3>
+                        <p>BYTS</p>
+                    </div>
+                    <div class="info-item">
+                        <h3>Decimals</h3>
+                        <p>3</p>
+                    </div>
+                    <div class="info-item">
+                        <h3>Total Supply</h3>
+                        <p>66,000,000</p>
+                    </div>
+                    <div class="info-item">
+                        <h3>Status</h3>
+                        <p style="color: var(--success);">Active</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Balance Card -->
+            <div class="card balance-card animated delay-1">
+                <div class="balance-wave"></div>
+                <div class="balance-content">
+                    <div class="balance-info">
+                        <h2>Your Token Balance</h2>
+                        <div class="balance-amount">50,000.000 BYTS</div>
+                        <div class="balance-address">
+                            <i class="fas fa-wallet"></i>
+                            0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
+                        </div>
+                    </div>
+                    <div class="balance-actions">
+                        <button class="balance-btn">
+                            <i class="fas fa-exchange-alt"></i>
+                            Quick Transfer
+                        </button>
+                        <button class="balance-btn">
+                            <i class="fas fa-fire"></i>
+                            Burn Tokens
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Transfer Card -->
+            <div class="card transfer-card animated delay-2">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <i class="fas fa-paper-plane"></i>
+                        Transfer Tokens
+                    </h2>
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <label for="recipient">Recipient Address</label>
+                        <input type="text" class="form-control" id="recipient" placeholder="0x...">
+                    </div>
+                    <div class="form-group">
+                        <label for="amount">Amount</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="amount" placeholder="0.000">
+                            <div class="input-group-append">BYTS</div>
+                        </div>
+                    </div>
+                    <button class="btn btn-block">Send Tokens</button>
+                </div>
+            </div>
+            
+            <!-- Approve Card -->
+            <div class="card approve-card animated delay-2">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <i class="fas fa-check"></i>
+                        Approve Spender
+                    </h2>
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <label for="spender">Spender Address</label>
+                        <input type="text" class="form-control" id="spender" placeholder="0x...">
+                    </div>
+                    <div class="form-group">
+                        <label for="approve-amount">Amount</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="approve-amount" placeholder="0.000">
+                            <div class="input-group-append">BYTS</div>
+                        </div>
+                    </div>
+                    <button class="btn btn-block">Approve Spender</button>
+                </div>
+            </div>
+            
+            <!-- Admin Controls Card -->
+            <div class="card admin-card animated delay-3">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <i class="fas fa-shield-alt"></i>
+                        Administrative Controls
+                    </h2>
+                </div>
+                <div class="admin-actions">
+                    <div class="admin-btn">
+                        <i class="fas fa-pause-circle"></i>
+                        <h3>Pause Contract</h3>
+                        <p>Disable all transfers</p>
+                    </div>
+                    <div class="admin-btn">
+                        <i class="fas fa-play-circle"></i>
+                        <h3>Unpause Contract</h3>
+                        <p>Enable all transfers</p>
+                    </div>
+                    <div class="admin-btn">
+                        <i class="fas fa-user-shield"></i>
+                        <h3>Transfer Ownership</h3>
+                        <p>Change contract owner</p>
+                    </div>
+                    <div class="admin-btn">
+                        <i class="fas fa-code"></i>
+                        <h3>Contract Details</h3>
+                        <p>View implementation</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Burn Card -->
+            <div class="card burn-card animated delay-4">
+                <div class="burn-animation">
+                    <i class="fas fa-fire" style="font-size: 100px; color: var(--danger);"></i>
+                </div>
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <i class="fas fa-fire"></i>
+                        Burn Tokens
+                    </h2>
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <label for="burn-amount">Amount to Burn</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="burn-amount" placeholder="0.000">
+                            <div class="input-group-append">BYTS</div>
+                        </div>
+                    </div>
+                    <button class="btn btn-block" style="background-color: var(--danger);">Burn Tokens</button>
+                </div>
+            </div>
+            
+            <!-- Transaction History Card -->
+            <div class="card transaction-card animated delay-4">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <i class="fas fa-history"></i>
+                        Recent Transactions
+                    </h2>
+                </div>
+                <div class="transaction-list">
+                    <div class="transaction-item">
+                        <div class="transaction-icon">
+                            <i class="fas fa-paper-plane"></i>
+                        </div>
+                        <div class="transaction-details">
+                            <div class="transaction-title">Transfer</div>
+                            <div class="transaction-address">To: 0x70997970C51812dc3A010C7d01b50e0d17dc79C8</div>
+                        </div>
+                        <div class="transaction-amount sent">-1,000.000 BYTS</div>
+                    </div>
+                    <div class="transaction-item">
+                        <div class="transaction-icon">
+                            <i class="fas fa-check"></i>
+                        </div>
+                        <div class="transaction-details">
+                            <div class="transaction-title">Approve</div>
+                            <div class="transaction-address">Spender: 0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC</div>
+                        </div>
+                        <div class="transaction-amount">5,000.000 BYTS</div>
+                    </div>
+                    <div class="transaction-item">
+                        <div class="transaction-icon">
+                            <i class="fas fa-fire"></i>
+                        </div>
+                        <div class="transaction-details">
+                            <div class="transaction-title">Burn</div>
+                            <div class="transaction-address">From: Your Account</div>
+                        </div>
+                        <div class="transaction-amount sent">-500.000 BYTS</div>
+                    </div>
+                    <div class="transaction-item">
+                        <div class="transaction-icon" style="color: var(--success);">
+                            <i class="fas fa-download"></i>
+                        </div>
+                        <div class="transaction-details">
+                            <div class="transaction-title">Receive</div>
+                            <div class="transaction-address">From: 0x90F79bf6EB2c4f870365E785982E1f101E93b906</div>
+                        </div>
+                        <div class="transaction-amount received">+2,500.000 BYTS</div>
+                    </div>
+                    <div class="transaction-item">
+                        <div class="transaction-icon">
+                            <i class="fas fa-paper-plane"></i>
+                        </div>
+                        <div class="transaction-details">
+                            <div class="transaction-title">Transfer</div>
+                            <div class="transaction-address">To: 0x15d34AAf54267DB7D7c367839AAf71A00a2C6A65</div>
+                        </div>
+                        <div class="transaction-amount sent">-750.000 BYTS</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <footer class="footer animated delay-5">
+            <p>Bytus Token Dashboard v1.0 | ERC20 Token: 0x5FbDB2315678afecb367f032d93F642f64180aa3</p>
+        </footer>
+    </div>
+    
+    <script>
+        // Add more particles dynamically
+        document.addEventListener('DOMContentLoaded', function() {
+            const particles = document.querySelector('.particles');
+            for (let i = 0; i < 15; i++) {
+                const particle = document.createElement('span');
+                particle.classList.add('particle');
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.width = (Math.random() * 20 + 5) + 'px';
+                particle.style.height = particle.style.width;
+                particle.style.animationDelay = (Math.random() * 5) + 's';
+                particle.style.animationDuration = (Math.random() * 10 + 5) + 's';
+                particles.appendChild(particle);
+            }
+            
+            // Simulate "active" status for buttons with hover effects
+            const adminBtns = document.querySelectorAll('.admin-btn');
+            adminBtns.forEach(btn => {
+                btn.addEventListener('mouseenter', function() {
+                    this.style.backgroundColor = 'rgba(58, 84, 237, 0.1)';
+                });
+                btn.addEventListener('mouseleave', function() {
+                    this.style.backgroundColor = 'var(--light)';
+                });
+            });
+
+            // Add flame animation to burn icon
+            setInterval(() => {
+                const burnIcon = document.querySelector('.burn-animation i');
+                burnIcon.style.transform = 'scale(' + (1 + Math.random() * 0.2) + ')';
+                setTimeout(() => {
+                    burnIcon.style.transform = 'scale(' + (1 + Math.random() * 0.1) + ')';
+                }, 150);
+            }, 300);
+            
+            // Add transaction items dynamically
+            const addTransaction = (type, address, amount, isReceived = false) => {
+                const transactionList = document.querySelector('.transaction-list');
+                const item = document.createElement('div');
+                item.classList.add('transaction-item');
+                
+                let icon = 'paper-plane';
+                if (type === 'Approve') icon = 'check';
+                if (type === 'Burn') icon = 'fire';
+                if (type === 'Receive') icon = 'download';
+                
+                item.innerHTML = `
+                    <div class="transaction-icon" ${type === 'Receive' ? 'style="color: var(--success);"' : ''}>
+                        <i class="fas fa-${icon}"></i>
+                    </div>
+                    <div class="transaction-details">
+                        <div class="transaction-title">${type}</div>
+                        <div class="transaction-address">${address}</div>
+                    </div>
+                    <div class="transaction-amount ${isReceived ? 'received' : (type === 'Approve' ? '' : 'sent')}">${isReceived ? '+' : (type === 'Approve' ? '' : '-')}${amount} BYTS</div>
+                `;
+                
+                // Add with animation
+                item.style.opacity = '0';
+                item.style.transform = 'translateY(10px)';
+                transactionList.prepend(item);
+                
+                setTimeout(() => {
+                    item.style.transition = 'all 0.3s ease';
+                    item.style.opacity = '1';
+                    item.style.transform = 'translateY(0)';
+                }, 50);
+                
+                // Remove oldest if too many
+                const items = transactionList.querySelectorAll('.transaction-item');
+                if (items.length > 5) {
+                    items[items.length - 1].remove();
+                }
+            };
+            
+            // Demo button interactions
+            const sendBtn = document.querySelector('.transfer-card .btn');
+            const approveBtn = document.querySelector('.approve-card .btn');
+            const burnBtn = document.querySelector('.burn-card .btn');
+            const quickTransferBtn = document.querySelector('.balance-actions .balance-btn:first-child');
+            const quickBurnBtn = document.querySelector('.balance-actions .balance-btn:last-child');
+            
+            sendBtn.addEventListener('click', function() {
+                const recipient = document.getElementById('recipient').value || '0x70997970C51812dc3A010C7d01b50e0d17dc79C8';
+                const amount = document.getElementById('amount').value || '100.000';
+                
+                // Show loading state
+                this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+                this.disabled = true;
+                
+                setTimeout(() => {
+                    // Update balance
+                    const balanceEl = document.querySelector('.balance-amount');
+                    let balance = parseFloat(balanceEl.textContent);
+                    balance -= parseFloat(amount);
+                    balanceEl.textContent = balance.toFixed(3) + ' BYTS';
+                    
+                    // Add transaction
+                    addTransaction('Transfer', 'To: ' + recipient, amount);
+                    
+                    // Reset form
+                    document.getElementById('recipient').value = '';
+                    document.getElementById('amount').value = '';
+                    
+                    // Reset button
+                    this.innerHTML = 'Send Tokens';
+                    this.disabled = false;
+                }, 1500);
+            });
+            
+            approveBtn.addEventListener('click', function() {
+                const spender = document.getElementById('spender').value || '0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC';
+                const amount = document.getElementById('approve-amount').value || '500.000';
+                
+                // Show loading state
+                this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+                this.disabled = true;
+                
+                setTimeout(() => {
+                    // Add transaction
+                    addTransaction('Approve', 'Spender: ' + spender, amount);
+                    
+                    // Reset form
+                    document.getElementById('spender').value = '';
+                    document.getElementById('approve-amount').value = '';
+                    
+                    // Reset button
+                    this.innerHTML = 'Approve Spender';
+                    this.disabled = false;
+                }, 1500);
+            });
+            
+            burnBtn.addEventListener('click', function() {
+                const amount = document.getElementById('burn-amount').value || '200.000';
+                
+                // Show loading state
+                this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+                this.disabled = true;
+                
+                setTimeout(() => {
+                    // Update balance
+                    const balanceEl = document.querySelector('.balance-amount');
+                    let balance = parseFloat(balanceEl.textContent);
+                    balance -= parseFloat(amount);
+                    balanceEl.textContent = balance.toFixed(3) + ' BYTS';
+                    
+                    // Update total supply
+                    const supplyEl = document.querySelector('.info-item:nth-child(3) p');
+                    let supply = parseFloat(supplyEl.textContent.replace(/,/g, ''));
+                    supply -= parseFloat(amount);
+                    supplyEl.textContent = supply.toLocaleString();
+                    
+                    // Add burn effect
+                    const burnAnimation = document.querySelector('.burn-animation i');
+                    burnAnimation.style.transform = 'scale(1.5)';
+                    burnAnimation.style.opacity = '0.5';
+                    
+                    setTimeout(() => {
+                        burnAnimation.style.transform = 'scale(1)';
+                        burnAnimation.style.opacity = '0.1';
+                    }, 1000);
+                    
+                    // Add transaction
+                    addTransaction('Burn', 'From: Your Account', amount);
+                    
+                    // Reset form
+                    document.getElementById('burn-amount').value = '';
+                    
+                    // Reset button
+                    this.innerHTML = 'Burn Tokens';
+                    this.disabled = false;
+                }, 1500);
+            });
+            
+            quickTransferBtn.addEventListener('click', function() {
+                // Generate random address and amount
+                const randomAddr = '0x' + Math.random().toString(16).substr(2, 40);
+                const randomAmount = (Math.random() * 1000 + 100).toFixed(3);
+                
+                // Update balance
+                const balanceEl = document.querySelector('.balance-amount');
+                let balance = parseFloat(balanceEl.textContent);
+                balance -= parseFloat(randomAmount);
+                balanceEl.textContent = balance.toFixed(3) + ' BYTS';
+                
+                // Add transaction
+                addTransaction('Transfer', 'To: ' + randomAddr, randomAmount);
+                
+                // Add effect
+                this.classList.add('pulse');
+                setTimeout(() => {
+                    this.classList.remove('pulse');
+                }, 1000);
+            });
+            
+            quickBurnBtn.addEventListener('click', function() {
+                // Generate random amount
+                const randomAmount = (Math.random() * 500 + 50).toFixed(3);
+                
+                // Update balance
+                const balanceEl = document.querySelector('.balance-amount');
+                let balance = parseFloat(balanceEl.textContent);
+                balance -= parseFloat(randomAmount);
+                balanceEl.textContent = balance.toFixed(3) + ' BYTS';
+                
+                // Update total supply
+                const supplyEl = document.querySelector('.info-item:nth-child(3) p');
+                let supply = parseFloat(supplyEl.textContent.replace(/,/g, ''));
+                supply -= parseFloat(randomAmount);
+                supplyEl.textContent = supply.toLocaleString();
+                
+                // Add burn effect
+                const burnAnimation = document.querySelector('.burn-animation i');
+                burnAnimation.style.transform = 'scale(1.5)';
+                burnAnimation.style.opacity = '0.5';
+                
+                setTimeout(() => {
+                    burnAnimation.style.transform = 'scale(1)';
+                    burnAnimation.style.opacity = '0.1';
+                }, 1000);
+                
+                // Add transaction
+                addTransaction('Burn', 'From: Your Account', randomAmount);
+                
+                // Add effect
+                this.classList.add('pulse');
+                setTimeout(() => {
+                    this.classList.remove('pulse');
+                }, 1000);
+            });
+            
+            // Admin panel interaction
+            const adminButtons = document.querySelectorAll('.admin-btn');
+            
+            adminButtons.forEach((btn, index) => {
+                btn.addEventListener('click', function() {
+                    // Different actions based on button
+                    if (index === 0) { // Pause
+                        const statusEl = document.querySelector('.info-item:nth-child(4) p');
+                        statusEl.textContent = 'Paused';
+                        statusEl.style.color = 'var(--warning)';
+                        
+                        // Show notification
+                        showNotification('Contract has been paused', 'warning');
+                    } else if (index === 1) { // Unpause
+                        const statusEl = document.querySelector('.info-item:nth-child(4) p');
+                        statusEl.textContent = 'Active';
+                        statusEl.style.color = 'var(--success)';
+                        
+                        // Show notification
+                        showNotification('Contract has been unpaused', 'success');
+                    } else if (index === 2) { // Transfer ownership
+                        // Show address input dialog
+                        showDialog('Transfer Ownership', 'Enter the new owner address:', function(address) {
+                            if (address) {
+                                showNotification('Ownership transferred to ' + address, 'info');
+                            }
+                        });
+                    } else if (index === 3) { // Contract details
+                        // Show contract code dialog
+                        showContractCode();
+                    }
+                    
+                    // Visual feedback
+                    this.style.backgroundColor = 'rgba(58, 84, 237, 0.2)';
+                    setTimeout(() => {
+                        this.style.backgroundColor = '';
+                    }, 300);
+                });
+            });
+            
+            // Notification system
+            function showNotification(message, type = 'info') {
+                const notification = document.createElement('div');
+                notification.className = 'notification ' + type;
+                
+                let icon = 'info-circle';
+                if (type === 'success') icon = 'check-circle';
+                if (type === 'warning') icon = 'exclamation-triangle';
+                if (type === 'error') icon = 'times-circle';
+                
+                notification.innerHTML = `
+                    <i class="fas fa-${icon}"></i>
+                    <span>${message}</span>
+                    <button class="close-btn"><i class="fas fa-times"></i></button>
+                `;
+                
+                document.body.appendChild(notification);
+                
+                // Style the notification
+                Object.assign(notification.style, {
+                    position: 'fixed',
+                    top: '20px',
+                    right: '20px',
+                    backgroundColor: 'white',
+                    padding: '15px 20px',
+                    borderRadius: '8px',
+                    boxShadow: '0 5px 15px rgba(0,0,0,0.1)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    zIndex: '1000',
+                    opacity: '0',
+                    transform: 'translateX(50px)',
+                    transition: 'all 0.3s ease'
+                });
+                
+                if (type === 'success') notification.style.borderLeft = '4px solid var(--success)';
+                if (type === 'warning') notification.style.borderLeft = '4px solid var(--warning)';
+                if (type === 'error') notification.style.borderLeft = '4px solid var(--danger)';
+                if (type === 'info') notification.style.borderLeft = '4px solid var(--info)';
+                
+                // Style the icon
+                const notificationIcon = notification.querySelector('i:first-child');
+                Object.assign(notificationIcon.style, {
+                    marginRight: '10px',
+                    fontSize: '1.2rem'
+                });
+                
+                if (type === 'success') notificationIcon.style.color = 'var(--success)';
+                if (type === 'warning') notificationIcon.style.color = 'var(--warning)';
+                if (type === 'error') notificationIcon.style.color = 'var(--danger)';
+                if (type === 'info') notificationIcon.style.color = 'var(--info)';
+                
+                // Style the close button
+                const closeBtn = notification.querySelector('.close-btn');
+                Object.assign(closeBtn.style, {
+                    marginLeft: '15px',
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    fontSize: '0.9rem',
+                    color: '#6e7191'
+                });
+                
+                // Animate in
+                setTimeout(() => {
+                    notification.style.opacity = '1';
+                    notification.style.transform = 'translateX(0)';
+                }, 10);
+                
+                // Auto dismiss
+                const dismissTimeout = setTimeout(() => {
+                    closeNotification();
+                }, 5000);
+                
+                // Close handler
+                closeBtn.addEventListener('click', () => {
+                    clearTimeout(dismissTimeout);
+                    closeNotification();
+                });
+                
+                function closeNotification() {
+                    notification.style.opacity = '0';
+                    notification.style.transform = 'translateX(50px)';
+                    
+                    setTimeout(() => {
+                        notification.remove();
+                    }, 300);
+                }
+            }
+            
+            // Dialog system
+            function showDialog(title, message, callback) {
+                // Create dialog
+                const dialog = document.createElement('div');
+                dialog.className = 'dialog-overlay';
+                
+                dialog.innerHTML = `
+                    <div class="dialog">
+                        <div class="dialog-header">
+                            <h3>${title}</h3>
+                            <button class="close-btn"><i class="fas fa-times"></i></button>
+                        </div>
+                        <div class="dialog-body">
+                            <p>${message}</p>
+                            <input type="text" class="dialog-input form-control" placeholder="0x...">
+                        </div>
+                        <div class="dialog-footer">
+                            <button class="btn dialog-cancel">Cancel</button>
+                            <button class="btn dialog-confirm">Confirm</button>
+                        </div>
+                    </div>
+                `;
+                
+                document.body.appendChild(dialog);
+                
+                // Style the overlay
+                Object.assign(dialog.style, {
+                    position: 'fixed',
+                    top: '0',
+                    left: '0',
+                    width: '100%',
+                    height: '100%',
+                    backgroundColor: 'rgba(0,0,0,0.5)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    zIndex: '1000',
+                    opacity: '0',
+                    transition: 'opacity 0.3s ease'
+                });
+                
+                // Style the dialog
+                const dialogBox = dialog.querySelector('.dialog');
+                Object.assign(dialogBox.style, {
+                    backgroundColor: 'white',
+                    borderRadius: '10px',
+                    width: '450px',
+                    maxWidth: '90%',
+                    boxShadow: '0 10px 30px rgba(0,0,0,0.2)',
+                    transform: 'translateY(-20px)',
+                    transition: 'transform 0.3s ease',
+                });
+                
+                // Style the header
+                const dialogHeader = dialog.querySelector('.dialog-header');
+                Object.assign(dialogHeader.style, {
+                    padding: '20px',
+                    borderBottom: '1px solid var(--grey)',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center'
+                });
+                
+                // Style the body
+                const dialogBody = dialog.querySelector('.dialog-body');
+                Object.assign(dialogBody.style, {
+                    padding: '20px'
+                });
+                
+                // Style the footer
+                const dialogFooter = dialog.querySelector('.dialog-footer');
+                Object.assign(dialogFooter.style, {
+                    padding: '15px 20px',
+                    borderTop: '1px solid var(--grey)',
+                    display: 'flex',
+                    justifyContent: 'flex-end',
+                    gap: '10px'
+                });
+                
+                // Style buttons
+                const cancelBtn = dialog.querySelector('.dialog-cancel');
+                Object.assign(cancelBtn.style, {
+                    backgroundColor: '#f5f5f5',
+                    color: '#333'
+                });
+                
+                // Animation
+                setTimeout(() => {
+                    dialog.style.opacity = '1';
+                    dialogBox.style.transform = 'translateY(0)';
+                }, 10);
+                
+                // Events
+                const closeBtn = dialog.querySelector('.close-btn');
+                closeBtn.addEventListener('click', closeDialog);
+                
+                cancelBtn.addEventListener('click', closeDialog);
+                
+                const confirmBtn = dialog.querySelector('.dialog-confirm');
+                confirmBtn.addEventListener('click', () => {
+                    const input = dialog.querySelector('.dialog-input');
+                    callback(input.value);
+                    closeDialog();
+                });
+                
+                function closeDialog() {
+                    dialog.style.opacity = '0';
+                    dialogBox.style.transform = 'translateY(-20px)';
+                    
+                    setTimeout(() => {
+                        dialog.remove();
+                    }, 300);
+                }
+            }
+            
+            // Show contract code
+            function showContractCode() {
+                // Create dialog
+                const dialog = document.createElement('div');
+                dialog.className = 'dialog-overlay';
+                
+                dialog.innerHTML = `
+                    <div class="dialog code-dialog">
+                        <div class="dialog-header">
+                            <h3>BytusToken.sol</h3>
+                            <button class="close-btn"><i class="fas fa-times"></i></button>
+                        </div>
+                        <div class="dialog-body code-container">
+                            <pre class="code-block"><code>// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
+
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
+import "@openzeppelin/contracts/security/Pausable.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+
+contract BytusToken is ERC20, ERC20Burnable, Pausable, Ownable {
+    constructor() ERC20("Bytus Token", "BYTS") {
+        _mint(msg.sender, 66000000 * (10 ** decimals()));
+    }
+    
+    function decimals() public view virtual override returns (uint8) {
+        return 3;
+    }
+    
+    function pause() public onlyOwner {
+        _pause();
+    }
+    
+    function unpause() public onlyOwner {
+        _unpause();
+    }
+    
+    function approveAndCall(address spender, uint256 amount, bytes memory data)
+        public returns (bool)
+    {
+        require(approve(spender, amount));
+        
+        // Call the receiveApproval function on the contract you want to be notified
+        (bool success, bytes memory returndata) = spender.call(
+            abi.encodeWithSignature(
+                "receiveApproval(address,uint256,address,bytes)",
+                msg.sender, amount, address(this), data
+            )
+        );
+        require(success);
+        
+        return true;
+    }
+    
+    function _beforeTokenTransfer(address from, address to, uint256 amount)
+        internal
+        whenNotPaused
+        override
+    {
+        super._beforeTokenTransfer(from, to, amount);
+    }
+}</code></pre>
+                        </div>
+                    </div>
+                `;
+                
+                document.body.appendChild(dialog);
+                
+                // Style the overlay
+                Object.assign(dialog.style, {
+                    position: 'fixed',
+                    top: '0',
+                    left: '0',
+                    width: '100%',
+                    height: '100%',
+                    backgroundColor: 'rgba(0,0,0,0.5)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    zIndex: '1000',
+                    opacity: '0',
+                    transition: 'opacity 0.3s ease'
+                });
+                
+                // Style the dialog
+                const dialogBox = dialog.querySelector('.dialog');
+                Object.assign(dialogBox.style, {
+                    backgroundColor: 'white',
+                    borderRadius: '10px',
+                    width: '700px',
+                    maxWidth: '90%',
+                    maxHeight: '90vh',
+                    boxShadow: '0 10px 30px rgba(0,0,0,0.2)',
+                    transform: 'translateY(-20px)',
+                    transition: 'transform 0.3s ease',
+                    display: 'flex',
+                    flexDirection: 'column'
+                });
+                
+                // Style the header
+                const dialogHeader = dialog.querySelector('.dialog-header');
+                Object.assign(dialogHeader.style, {
+                    padding: '20px',
+                    borderBottom: '1px solid var(--grey)',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center'
+                });
+                
+                // Style the body
+                const dialogBody = dialog.querySelector('.dialog-body');
+                Object.assign(dialogBody.style, {
+                    padding: '0',
+                    overflow: 'auto',
+                    flexGrow: '1'
+                });
+                
+                // Style code container
+                const codeContainer = dialog.querySelector('.code-container');
+                Object.assign(codeContainer.style, {
+                    maxHeight: 'calc(90vh - 70px)',
+                    overflow: 'auto'
+                });
+                
+                // Style code
+                const codeBlock = dialog.querySelector('.code-block');
+                Object.assign(codeBlock.style, {
+                    margin: '0',
+                    padding: '20px',
+                    backgroundColor: '#1e1e1e',
+                    color: '#d4d4d4',
+                    overflow: 'auto',
+                    fontSize: '14px',
+                    lineHeight: '1.5',
+                    fontFamily: 'Consolas, Monaco, "Andale Mono", monospace'
+                });
+                
+                // Syntax highlighting (simple version)
+                const code = codeBlock.querySelector('code');
+                let content = code.innerHTML;
+                
+                // Keywords
+                content = content.replace(/(pragma|solidity|import|contract|is|function|public|private|view|virtual|override|returns|require|address|uint256|bytes|memory|internal|whenNotPaused|onlyOwner)/g, '<span style="color: #569cd6;">$1</span>');
+                
+                // Comments
+                content = content.replace(/(\/\/ .+)/g, '<span style="color: #6a9955;">$1</span>');
+                
+                // Strings
+                content = content.replace(/"([^"]*)"/g, '<span style="color: #ce9178;">"$1"</span>');
+                
+                // Function calls
+                content = content.replace(/(\.\w+)(\()/g, '<span style="color: #dcdcaa;">$1</span>$2');
+                
+                code.innerHTML = content;
+                
+                // Animation
+                setTimeout(() => {
+                    dialog.style.opacity = '1';
+                    dialogBox.style.transform = 'translateY(0)';
+                }, 10);
+                
+                // Events
+                const closeBtn = dialog.querySelector('.close-btn');
+                closeBtn.addEventListener('click', closeDialog);
+                
+                function closeDialog() {
+                    dialog.style.opacity = '0';
+                    dialogBox.style.transform = 'translateY(-20px)';
+                    
+                    setTimeout(() => {
+                        dialog.remove();
+                    }, 300);
+                }
+            }
+            
+            // Make the dashboard interactive with CSS for notifications
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes pulse {
+                    0% { transform: scale(1); }
+                    50% { transform: scale(1.05); }
+                    100% { transform: scale(1); }
+                }
+                .pulse {
+                    animation: pulse 0.5s ease;
+                }
+                .notification {
+                    z-index: 9999;
+                }
+                .dialog-overlay {
+                    z-index: 10000;
+                }
+            `;
+            document.head.appendChild(style);
+            
+            // Send a welcome notification
+            setTimeout(() => {
+                showNotification('Welcome to Bytus Token Admin Dashboard', 'info');
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

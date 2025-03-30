@@ -1,0 +1,1389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bytus Admin Dashboard</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.8.2/web3.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+  <style>
+    :root {
+      --primary: #3498db;
+      --secondary: #2ecc71;
+      --warning: #e74c3c;
+      --dark: #34495e;
+      --light: #ecf0f1;
+    }
+    
+    * {
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: var(--light);
+      color: var(--dark);
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 0;
+      border-bottom: 1px solid #ddd;
+      margin-bottom: 30px;
+    }
+    
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    
+    .logo-icon {
+      width: 50px;
+      height: 50px;
+      background-color: var(--primary);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 10px;
+      font-weight: bold;
+      font-size: 24px;
+    }
+    
+    .logo-text h1 {
+      margin: 0;
+      font-size: 24px;
+    }
+    
+    .logo-text p {
+      margin: 0;
+      font-size: 14px;
+      color: #777;
+    }
+    
+    .connection-status {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .status-indicator {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background-color: var(--warning);
+    }
+    
+    .status-indicator.connected {
+      background-color: var(--secondary);
+    }
+    
+    .connect-btn {
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+    
+    .connect-btn:hover {
+      opacity: 0.9;
+    }
+    
+    .network-select {
+      padding: 8px;
+      border-radius: 4px;
+      border: 1px solid #ddd;
+    }
+    
+    .dashboard {
+      display: grid;
+      grid-template-columns: 250px 1fr;
+      gap: 30px;
+    }
+    
+    .sidebar {
+      background-color: white;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+    
+    .nav-item {
+      padding: 15px 20px;
+      border-bottom: 1px solid #eee;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    
+    .nav-item:hover {
+      background-color: #f8f9fa;
+    }
+    
+    .nav-item.active {
+      background-color: var(--primary);
+      color: white;
+    }
+    
+    .content {
+      background-color: white;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      padding: 20px;
+    }
+    
+    .panel {
+      display: none;
+    }
+    
+    .panel.active {
+      display: block;
+    }
+    
+    .summary-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+    
+    .card {
+      background-color: white;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      padding: 20px;
+    }
+    
+    .card-title {
+      font-size: 14px;
+      color: #777;
+      margin-bottom: 5px;
+    }
+    
+    .card-value {
+      font-size: 24px;
+      font-weight: bold;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+    
+    .form-control {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 16px;
+    }
+    
+    .btn {
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    
+    .btn:hover {
+      opacity: 0.9;
+    }
+    
+    .btn-secondary {
+      background-color: var(--secondary);
+    }
+    
+    .btn-warning {
+      background-color: var(--warning);
+    }
+    
+    .section-title {
+      font-size: 20px;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #eee;
+    }
+    
+    .transaction-history {
+      margin-top: 30px;
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    
+    th, td {
+      padding: 12px 15px;
+      text-align: left;
+      border-bottom: 1px solid #eee;
+    }
+    
+    th {
+      background-color: #f8f9fa;
+      font-weight: 500;
+    }
+    
+    .alert {
+      padding: 15px;
+      margin-bottom: 20px;
+      border-radius: 4px;
+    }
+    
+    .alert-success {
+      background-color: #d4edda;
+      color: #155724;
+    }
+    
+    .alert-danger {
+      background-color: #f8d7da;
+      color: #721c24;
+    }
+    
+    .loading {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255,255,255,0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 1s ease-in-out infinite;
+      margin-left: 10px;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    .hidden {
+      display: none;
+    }
+    
+    .mb-20 {
+      margin-bottom: 20px;
+    }
+    
+    .flex {
+      display: flex;
+    }
+    
+    .justify-between {
+      justify-content: space-between;
+    }
+    
+    .align-center {
+      align-items: center;
+    }
+    
+    .gap-10 {
+      gap: 10px;
+    }
+    
+    /* Responsive styles */
+    @media (max-width: 768px) {
+      .dashboard {
+        grid-template-columns: 1fr;
+      }
+      
+      .sidebar {
+        margin-bottom: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="logo">
+        <div class="logo-icon">B</div>
+        <div class="logo-text">
+          <h1>Bytus Token</h1>
+          <p>Admin Dashboard</p>
+        </div>
+      </div>
+      <div class="connection-status">
+        <div class="status-indicator" id="connection-indicator"></div>
+        <span id="connection-text">Not connected</span>
+        <select class="network-select" id="network-select">
+          <option value="localhost">Localhost</option>
+          <option value="goerli">Goerli Testnet</option>
+          <option value="sepolia">Sepolia Testnet</option>
+          <option value="mainnet">Ethereum Mainnet</option>
+        </select>
+        <button class="connect-btn" id="connect-wallet">Connect Wallet</button>
+      </div>
+    </div>
+    
+    <div class="dashboard">
+      <div class="sidebar">
+        <div class="nav-item active" data-panel="overview">Overview</div>
+        <div class="nav-item" data-panel="transfer">Transfer Tokens</div>
+        <div class="nav-item" data-panel="approve">Approve & Transfer From</div>
+        <div class="nav-item" data-panel="burn">Burn Tokens</div>
+        <div class="nav-item" data-panel="admin">Admin Controls</div>
+      </div>
+      
+      <div class="content">
+        <!-- Overview Panel -->
+        <div class="panel active" id="overview-panel">
+          <h2 class="section-title">Overview</h2>
+          <div id="alert-container"></div>
+          
+          <div class="summary-cards">
+            <div class="card">
+              <div class="card-title">Token Name</div>
+              <div class="card-value" id="token-name">-</div>
+            </div>
+            <div class="card">
+              <div class="card-title">Token Symbol</div>
+              <div class="card-value" id="token-symbol">-</div>
+            </div>
+            <div class="card">
+              <div class="card-title">Decimals</div>
+              <div class="card-value" id="token-decimals">-</div>
+            </div>
+            <div class="card">
+              <div class="card-title">Total Supply</div>
+              <div class="card-value" id="token-supply">-</div>
+            </div>
+          </div>
+          
+          <div class="card mb-20">
+            <div class="flex justify-between align-center mb-20">
+              <h3 style="margin: 0;">Your Account</h3>
+              <button class="btn btn-secondary" id="refresh-balance">Refresh</button>
+            </div>
+            <div class="summary-cards">
+              <div class="card">
+                <div class="card-title">Address</div>
+                <div class="card-value" id="user-address" style="font-size: 16px; word-break: break-all;">-</div>
+              </div>
+              <div class="card">
+                <div class="card-title">Balance</div>
+                <div class="card-value" id="user-balance">-</div>
+              </div>
+              <div class="card">
+                <div class="card-title">Owner Status</div>
+                <div class="card-value" id="owner-status">-</div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="transaction-history">
+            <h3>Recent Transactions</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th>Type</th>
+                  <th>From</th>
+                  <th>To</th>
+                  <th>Amount</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="tx-table-body">
+                <!-- Transaction rows will be added here -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+        
+        <!-- Transfer Panel -->
+        <div class="panel" id="transfer-panel">
+          <h2 class="section-title">Transfer Tokens</h2>
+          <div id="transfer-alert-container"></div>
+          
+          <div class="card mb-20">
+            <div class="form-group">
+              <label for="transfer-to">Recipient Address</label>
+              <input type="text" class="form-control" id="transfer-to" placeholder="0x...">
+            </div>
+            <div class="form-group">
+              <label for="transfer-amount">Amount</label>
+              <input type="number" class="form-control" id="transfer-amount" placeholder="0.000">
+            </div>
+            <button class="btn" id="send-transfer">Send Tokens</button>
+          </div>
+        </div>
+        
+        <!-- Approve Panel -->
+        <div class="panel" id="approve-panel">
+          <h2 class="section-title">Approve & Transfer From</h2>
+          <div id="approve-alert-container"></div>
+          
+          <div class="card mb-20">
+            <h3>Approve Spender</h3>
+            <div class="form-group">
+              <label for="approve-spender">Spender Address</label>
+              <input type="text" class="form-control" id="approve-spender" placeholder="0x...">
+            </div>
+            <div class="form-group">
+              <label for="approve-amount">Amount</label>
+              <input type="number" class="form-control" id="approve-amount" placeholder="0.000">
+            </div>
+            <button class="btn" id="send-approve">Approve</button>
+          </div>
+          
+          <div class="card mb-20">
+            <h3>Approve and Call</h3>
+            <div class="form-group">
+              <label for="approve-call-spender">Spender Contract Address</label>
+              <input type="text" class="form-control" id="approve-call-spender" placeholder="0x...">
+            </div>
+            <div class="form-group">
+              <label for="approve-call-amount">Amount</label>
+              <input type="number" class="form-control" id="approve-call-amount" placeholder="0.000">
+            </div>
+            <div class="form-group">
+              <label for="approve-call-data">Extra Data (hex)</label>
+              <input type="text" class="form-control" id="approve-call-data" placeholder="0x...">
+            </div>
+            <button class="btn" id="send-approve-call">Approve and Call</button>
+          </div>
+          
+          <div class="card mb-20">
+            <h3>Check Allowance</h3>
+            <div class="form-group">
+              <label for="allowance-owner">Token Owner</label>
+              <input type="text" class="form-control" id="allowance-owner" placeholder="0x...">
+            </div>
+            <div class="form-group">
+              <label for="allowance-spender">Spender</label>
+              <input type="text" class="form-control" id="allowance-spender" placeholder="0x...">
+            </div>
+            <button class="btn" id="check-allowance">Check Allowance</button>
+            <div class="mt-10" id="allowance-result"></div>
+          </div>
+          
+          <div class="card">
+            <h3>Transfer From</h3>
+            <div class="form-group">
+              <label for="transfer-from-sender">From Address</label>
+              <input type="text" class="form-control" id="transfer-from-sender" placeholder="0x...">
+            </div>
+            <div class="form-group">
+              <label for="transfer-from-recipient">To Address</label>
+              <input type="text" class="form-control" id="transfer-from-recipient" placeholder="0x...">
+            </div>
+            <div class="form-group">
+              <label for="transfer-from-amount">Amount</label>
+              <input type="number" class="form-control" id="transfer-from-amount" placeholder="0.000">
+            </div>
+            <button class="btn" id="send-transfer-from">Transfer</button>
+          </div>
+        </div>
+        
+        <!-- Burn Panel -->
+        <div class="panel" id="burn-panel">
+          <h2 class="section-title">Burn Tokens</h2>
+          <div id="burn-alert-container"></div>
+          
+          <div class="card mb-20">
+            <h3>Burn Your Tokens</h3>
+            <div class="form-group">
+              <label for="burn-amount">Amount to Burn</label>
+              <input type="number" class="form-control" id="burn-amount" placeholder="0.000">
+            </div>
+            <button class="btn btn-warning" id="send-burn">Burn Tokens</button>
+          </div>
+          
+          <div class="card">
+            <h3>Burn From Another Account</h3>
+            <div class="form-group">
+              <label for="burn-from-address">From Address</label>
+              <input type="text" class="form-control" id="burn-from-address" placeholder="0x...">
+            </div>
+            <div class="form-group">
+              <label for="burn-from-amount">Amount to Burn</label>
+              <input type="number" class="form-control" id="burn-from-amount" placeholder="0.000">
+            </div>
+            <button class="btn btn-warning" id="send-burn-from">Burn From</button>
+          </div>
+        </div>
+        
+        <!-- Admin Panel -->
+        <div class="panel" id="admin-panel">
+          <h2 class="section-title">Admin Controls</h2>
+          <div id="admin-alert-container"></div>
+          
+          <div class="card mb-20">
+            <h3>Contract Status</h3>
+            <div class="flex align-center gap-10 mb-20">
+              <div>Current Status:</div>
+              <div id="pause-status">Loading...</div>
+            </div>
+            <div class="flex gap-10">
+              <button class="btn" id="pause-contract">Pause Contract</button>
+              <button class="btn btn-secondary" id="unpause-contract">Unpause Contract</button>
+            </div>
+          </div>
+          
+          <div class="card">
+            <h3>Contract Information</h3>
+            <div class="form-group">
+              <label>Contract Address</label>
+              <div id="contract-address" class="form-control" style="background-color: #f8f9fa;">-</div>
+            </div>
+            <div class="form-group">
+              <label>Contract Owner</label>
+              <div id="contract-owner" class="form-control" style="background-color: #f8f9fa;">-</div>
+            </div>
+            <div class="form-group">
+              <label for="contract-address-input">Set Contract Address</label>
+              <div class="flex gap-10">
+                <input type="text" class="form-control" id="contract-address-input" placeholder="0x...">
+                <button class="btn" id="set-contract-address">Set</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contract ABI -->
+  <script>
+    // BytusToken ABI
+    const TOKEN_ABI = [
+      // ERC20 Standard Functions
+      "function name() view returns (string)",
+      "function symbol() view returns (string)",
+      "function decimals() view returns (uint8)",
+      "function totalSupply() view returns (uint256)",
+      "function balanceOf(address) view returns (uint256)",
+      "function transfer(address to, uint256 amount) returns (bool)",
+      "function allowance(address owner, address spender) view returns (uint256)",
+      "function approve(address spender, uint256 amount) returns (bool)",
+      "function transferFrom(address from, address to, uint256 amount) returns (bool)",
+      
+      // Extended Functionality
+      "function approveAndCall(address spender, uint256 value, bytes calldata extraData) returns (bool)",
+      "function burn(uint256 amount) returns (bool)",
+      "function burnFrom(address account, uint256 amount) returns (bool)",
+      
+      // Pausable Functionality
+      "function paused() view returns (bool)",
+      "function pause() returns ()",
+      "function unpause() returns ()",
+      
+      // Ownable Functionality
+      "function owner() view returns (address)",
+      
+      // Events
+      "event Transfer(address indexed from, address indexed to, uint256 value)",
+      "event Approval(address indexed owner, address indexed spender, uint256 value)",
+      "event Paused(address account)",
+      "event Unpaused(address account)"
+    ];
+
+    // App state
+    let state = {
+      provider: null,
+      signer: null,
+      contract: null,
+      contractAddress: '',
+      userAddress: '',
+      networkInfo: {
+        localhost: {
+          rpcUrl: 'http://localhost:8545',
+          chainId: 31337
+        },
+        goerli: {
+          rpcUrl: 'https://goerli.infura.io/v3/your-infura-id',
+          chainId: 5
+        },
+        sepolia: {
+          rpcUrl: 'https://sepolia.infura.io/v3/your-infura-id',
+          chainId: 11155111
+        },
+        mainnet: {
+          rpcUrl: 'https://mainnet.infura.io/v3/your-infura-id',
+          chainId: 1
+        }
+      }
+    };
+
+    // Initialize the application
+    async function init() {
+      // Setup event listeners
+      setupEventListeners();
+      
+      // Check if Web3 is available
+      if (window.ethereum) {
+        try {
+          // Setup provider
+          const provider = new ethers.providers.Web3Provider(window.ethereum);
+          state.provider = provider;
+          
+          // Auto-connect if already connected
+          const accounts = await provider.listAccounts();
+          if (accounts.length > 0) {
+            await connectWallet();
+          }
+        } catch (error) {
+          console.error("Error initializing Web3:", error);
+          showAlert('overview', 'Failed to initialize Web3 provider', 'danger');
+        }
+      } else {
+        console.log("No ethereum provider detected");
+        showAlert('overview', 'No Web3 provider detected. Please install MetaMask.', 'danger');
+      }
+    }
+
+    // Setup event listeners for the UI
+    function setupEventListeners() {
+      // Navigation
+      document.querySelectorAll('.nav-item').forEach(item => {
+        item.addEventListener('click', () => {
+          document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+          item.classList.add('active');
+          
+          const panelId = item.getAttribute('data-panel');
+          document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+          document.getElementById(`${panelId}-panel`).classList.add('active');
+        });
+      });
+      
+      // Connect wallet button
+      document.getElementById('connect-wallet').addEventListener('click', connectWallet);
+      
+      // Overview panel
+      document.getElementById('refresh-balance').addEventListener('click', refreshAccountInfo);
+      
+      // Transfer panel
+      document.getElementById('send-transfer').addEventListener('click', handleTransfer);
+      
+      // Approve panel
+      document.getElementById('send-approve').addEventListener('click', handleApprove);
+      document.getElementById('send-approve-call').addEventListener('click', handleApproveAndCall);
+      document.getElementById('check-allowance').addEventListener('click', handleCheckAllowance);
+      document.getElementById('send-transfer-from').addEventListener('click', handleTransferFrom);
+      
+      // Burn panel
+      document.getElementById('send-burn').addEventListener('click', handleBurn);
+      document.getElementById('send-burn-from').addEventListener('click', handleBurnFrom);
+      
+      // Admin panel
+      document.getElementById('pause-contract').addEventListener('click', handlePause);
+      document.getElementById('unpause-contract').addEventListener('click', handleUnpause);
+      document.getElementById('set-contract-address').addEventListener('click', handleSetContractAddress);
+      
+      // Network select
+      document.getElementById('network-select').addEventListener('change', handleNetworkChange);
+    }
+
+    // Connect wallet
+    async function connectWallet() {
+      try {
+        // Handle connection
+        await window.ethereum.request({ method: 'eth_requestAccounts' });
+        
+        // Setup provider and signer
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        state.provider = provider;
+        state.signer = provider.getSigner();
+        
+        // Get user address
+        const address = await state.signer.getAddress();
+        state.userAddress = address;
+        
+        // Update connection status UI
+        updateConnectionStatus(true);
+        
+        // Set default contract address
+        if (document.getElementById('contract-address-input').value) {
+          await handleSetContractAddress();
+        }
+        
+        // Refresh account info
+        refreshAccountInfo();
+        
+        console.log("Connected:", address);
+        showAlert('overview', 'Wallet connected successfully!', 'success');
+      } catch (error) {
+        console.error("Connection error:", error);
+        showAlert('overview', 'Failed to connect wallet. Please try again.', 'danger');
+        updateConnectionStatus(false);
+      }
+    }
+
+    // Update connection status UI
+    function updateConnectionStatus(connected) {
+      const indicator = document.getElementById('connection-indicator');
+      const text = document.getElementById('connection-text');
+      const connectBtn = document.getElementById('connect-wallet');
+      
+      if (connected) {
+        indicator.classList.add('connected');
+        text.textContent = 'Connected: ' + shortenAddress(state.userAddress);
+        connectBtn.textContent = 'Change Wallet';
+        
+        // Update user address display
+        document.getElementById('user-address').textContent = state.userAddress;
+      } else {
+        indicator.classList.remove('connected');
+        text.textContent = 'Not connected';
+        connectBtn.textContent = 'Connect Wallet';
+        
+        // Reset user address display
+        document.getElementById('user-address').textContent = '-';
+      }
+    }
+
+    // Refresh account and contract info
+    async function refreshAccountInfo() {
+      if (!state.provider || !state.signer || !state.contract) return;
+      
+      try {
+        // Get account balance
+        const balance = await state.contract.balanceOf(state.userAddress);
+        const decimals = await state.contract.decimals();
+        const formattedBalance = ethers.utils.formatUnits(balance, decimals);
+        document.getElementById('user-balance').textContent = formattedBalance;
+        
+        // Check if user is contract owner
+        const owner = await state.contract.owner();
+        const isOwner = owner.toLowerCase() === state.userAddress.toLowerCase();
+        document.getElementById('owner-status').textContent = isOwner ? 'Owner' : 'Not Owner';
+        
+        // Get token info
+        const name = await state.contract.name();
+        const symbol = await state.contract.symbol();
+        const totalSupply = await state.contract.totalSupply();
+        const formattedSupply = ethers.utils.formatUnits(totalSupply, decimals);
+        
+        document.getElementById('token-name').textContent = name;
+        document.getElementById('token-symbol').textContent = symbol;
+        document.getElementById('token-decimals').textContent = decimals;
+        document.getElementById('token-supply').textContent = formattedSupply;
+        
+        // Get pause status
+        const paused = await state.contract.paused();
+        document.getElementById('pause-status').textContent = paused ? 'Paused' : 'Active';
+        
+        // Update contract info in admin panel
+        document.getElementById('contract-address').textContent = state.contractAddress;
+        document.getElementById('contract-owner').textContent = owner;
+        
+        console.log("Account info refreshed");
+      } catch (error) {
+        console.error("Error refreshing account info:", error);
+        showAlert('overview', 'Failed to refresh account information.', 'danger');
+      }
+    }
+
+    // Set contract address and initialize contract
+    async function handleSetContractAddress() {
+      const addressInput = document.getElementById('contract-address-input').value || state.contractAddress;
+      
+      if (!ethers.utils.isAddress(addressInput)) {
+        showAlert('admin', 'Invalid contract address format', 'danger');
+        return;
+      }
+      
+      try {
+        // Initialize contract
+        state.contractAddress = addressInput;
+        state.contract = new ethers.Contract(addressInput, TOKEN_ABI, state.signer);
+        
+        // Check if contract is valid by trying to call a method
+        await state.contract.name();
+        
+        document.getElementById('contract-address').textContent = addressInput;
+        document.getElementById('contract-address-input').value = addressInput;
+        
+        // Refresh account info
+        refreshAccountInfo();
+        
+        showAlert('admin', 'Contract set successfully!', 'success');
+      } catch (error) {
+        console.error("Error setting contract:", error);
+        showAlert('admin', 'Failed to set contract. Check if address is valid.', 'danger');
+      }
+    }
+
+    // Handle network change
+    async function handleNetworkChange() {
+      const network = document.getElementById('network-select').value;
+      
+      // Only web3 injected provider can change networks
+      if (window.ethereum) {
+        try {
+          await window.ethereum.request({
+            method: 'wallet_switchEthereumChain',
+            params: [{ chainId: '0x' + state.networkInfo[network].chainId.toString(16) }],
+          });
+          
+          // Reconnect after network change
+          await connectWallet();
+        } catch (error) {
+          console.error("Error switching network:", error);
+          showAlert('overview', 'Failed to switch network. The network may not be configured in your wallet.', 'danger');
+        }
+      }
+    }
+
+    // Transfer tokens
+    async function handleTransfer() {
+      if (!state.contract) {
+        showAlert('transfer', 'Please connect your wallet and set contract address first', 'danger');
+        return;
+      }
+      
+      const to = document.getElementById('transfer-to').value;
+      const amount = document.getElementById('transfer-amount').value;
+      
+      if (!ethers.utils.isAddress(to)) {
+        showAlert('transfer', 'Invalid recipient address', 'danger');
+        return;
+      }
+      
+      if (amount <= 0) {
+        showAlert('transfer', 'Amount must be greater than 0', 'danger');
+        return;
+      }
+      
+      try {
+        // Convert amount to token units with proper decimals
+        const decimals = await state.contract.decimals();
+        const amountInWei = ethers.utils.parseUnits(amount.toString(), decimals);
+        
+        // Show pending alert
+        showAlert('transfer', 'Transaction pending...', 'info');
+        
+        // Send transaction
+        const tx = await state.contract.transfer(to, amountInWei);
+        
+        // Add to transaction history
+        addTransactionToHistory('Transfer', state.userAddress, to, amount, 'Pending');
+        
+        // Wait for transaction to be mined
+        await tx.wait();
+        
+        // Clear form
+        document.getElementById('transfer-to').value = '';
+        document.getElementById('transfer-amount').value = '';
+        
+        // Update transaction history
+        updateTransactionStatus(tx.hash, 'Completed');
+        
+        // Refresh balance
+        refreshAccountInfo();
+        
+        showAlert('transfer', 'Transfer successful!', 'success');
+      } catch (error) {
+        console.error("Transfer error:", error);
+        showAlert('transfer', `Transfer failed: ${parseError(error)}`, 'danger');
+      }
+    }
+
+    // Approve spender
+    async function handleApprove() {
+      if (!state.contract) {
+        showAlert('approve', 'Please connect your wallet and set contract address first', 'danger');
+        return;
+      }
+      
+      const spender = document.getElementById('approve-spender').value;
+      const amount = document.getElementById('approve-amount').value;
+      
+      if (!ethers.utils.isAddress(spender)) {
+        showAlert('approve', 'Invalid spender address', 'danger');
+        return;
+      }
+      
+      if (amount < 0) {
+        showAlert('approve', 'Amount must be greater than or equal to 0', 'danger');
+        return;
+      }
+      
+      try {
+        // Convert amount to token units with proper decimals
+        const decimals = await state.contract.decimals();
+        const amountInWei = ethers.utils.parseUnits(amount.toString(), decimals);
+        
+        // Show pending alert
+        showAlert('approve', 'Transaction pending...', 'info');
+        
+        // Send transaction
+        const tx = await state.contract.approve(spender, amountInWei);
+        
+        // Add to transaction history
+        addTransactionToHistory('Approve', state.userAddress, spender, amount, 'Pending');
+        
+        // Wait for transaction to be mined
+        await tx.wait();
+        
+        // Clear form
+        document.getElementById('approve-spender').value = '';
+        document.getElementById('approve-amount').value = '';
+        
+        // Update transaction history
+        updateTransactionStatus(tx.hash, 'Completed');
+        
+        showAlert('approve', 'Approval successful!', 'success');
+      } catch (error) {
+        console.error("Approve error:", error);
+        showAlert('approve', `Approval failed: ${parseError(error)}`, 'danger');
+      }
+    }
+
+    // Approve and call
+    async function handleApproveAndCall() {
+      if (!state.contract) {
+        showAlert('approve', 'Please connect your wallet and set contract address first', 'danger');
+        return;
+      }
+      
+      const spender = document.getElementById('approve-call-spender').value;
+      const amount = document.getElementById('approve-call-amount').value;
+      const extraData = document.getElementById('approve-call-data').value;
+      
+      if (!ethers.utils.isAddress(spender)) {
+        showAlert('approve', 'Invalid spender address', 'danger');
+        return;
+      }
+      
+      if (amount <= 0) {
+        showAlert('approve', 'Amount must be greater than 0', 'danger');
+        return;
+      }
+      
+      // Validate and format extra data
+      let formattedData;
+      try {
+        if (extraData.startsWith('0x')) {
+          formattedData = extraData;
+        } else {
+          formattedData = '0x' + extraData;
+        }
+        
+        // Check if it's valid hex
+        ethers.utils.hexlify(formattedData);
+      } catch (error) {
+        showAlert('approve', 'Invalid hex data format for extra data', 'danger');
+        return;
+      }
+      
+      try {
+        // Convert amount to token units with proper decimals
+        const decimals = await state.contract.decimals();
+        const amountInWei = ethers.utils.parseUnits(amount.toString(), decimals);
+        
+        // Show pending alert
+        showAlert('approve', 'Transaction pending...', 'info');
+        
+        // Send transaction
+        const tx = await state.contract.approveAndCall(spender, amountInWei, formattedData);
+        
+        // Add to transaction history
+        addTransactionToHistory('ApproveAndCall', state.userAddress, spender, amount, 'Pending');
+        
+        // Wait for transaction to be mined
+        await tx.wait();
+        
+        // Clear form
+        document.getElementById('approve-call-spender').value = '';
+        document.getElementById('approve-call-amount').value = '';
+        document.getElementById('approve-call-data').value = '';
+        
+        // Update transaction history
+        updateTransactionStatus(tx.hash, 'Completed');
+        
+        showAlert('approve', 'Approve and call successful!', 'success');
+      } catch (error) {
+        console.error("Approve and call error:", error);
+        showAlert('approve', `Approve and call failed: ${parseError(error)}`, 'danger');
+      }
+    }
+
+    // Check allowance
+    async function handleCheckAllowance() {
+      if (!state.contract) {
+        showAlert('approve', 'Please connect your wallet and set contract address first', 'danger');
+        return;
+      }
+      
+      const owner = document.getElementById('allowance-owner').value;
+      const spender = document.getElementById('allowance-spender').value;
+      
+      if (!ethers.utils.isAddress(owner)) {
+        showAlert('approve', 'Invalid owner address', 'danger');
+        return;
+      }
+      
+      if (!ethers.utils.isAddress(spender)) {
+        showAlert('approve', 'Invalid spender address', 'danger');
+        return;
+      }
+      
+      try {
+        // Get allowance
+        const allowance = await state.contract.allowance(owner, spender);
+        const decimals = await state.contract.decimals();
+        const formattedAllowance = ethers.utils.formatUnits(allowance, decimals);
+        
+        // Display result
+        const resultElement = document.getElementById('allowance-result');
+        resultElement.innerHTML = `<div class="alert alert-success">Allowance: ${formattedAllowance} tokens</div>`;
+      } catch (error) {
+        console.error("Check allowance error:", error);
+        showAlert('approve', `Failed to check allowance: ${parseError(error)}`, 'danger');
+      }
+    }
+
+    // Transfer from
+    async function handleTransferFrom() {
+      if (!state.contract) {
+        showAlert('approve', 'Please connect your wallet and set contract address first', 'danger');
+        return;
+      }
+      
+      const from = document.getElementById('transfer-from-sender').value;
+      const to = document.getElementById('transfer-from-recipient').value;
+      const amount = document.getElementById('transfer-from-amount').value;
+      
+      if (!ethers.utils.isAddress(from)) {
+        showAlert('approve', 'Invalid sender address', 'danger');
+        return;
+      }
+      
+      if (!ethers.utils.isAddress(to)) {
+        showAlert('approve', 'Invalid recipient address', 'danger');
+        return;
+      }
+      
+      if (amount <= 0) {
+        showAlert('approve', 'Amount must be greater than 0', 'danger');
+        return;
+      }
+      
+      try {
+        // Convert amount to token units with proper decimals
+        const decimals = await state.contract.decimals();
+        const amountInWei = ethers.utils.parseUnits(amount.toString(), decimals);
+        
+        // Check allowance first
+        const allowance = await state.contract.allowance(from, state.userAddress);
+        if (allowance.lt(amountInWei)) {
+          showAlert('approve', `Insufficient allowance. You are allowed to transfer ${ethers.utils.formatUnits(allowance, decimals)} tokens.`, 'danger');
+          return;
+        }
+        
+        // Show pending alert
+        showAlert('approve', 'Transaction pending...', 'info');
+        
+        // Send transaction
+        const tx = await state.contract.transferFrom(from, to, amountInWei);
+        
+        // Add to transaction history
+        addTransactionToHistory('TransferFrom', from, to, amount, 'Pending');
+        
+        // Wait for transaction to be mined
+        await tx.wait();
+        
+        // Clear form
+        document.getElementById('transfer-from-sender').value = '';
+        document.getElementById('transfer-from-recipient').value = '';
+        document.getElementById('transfer-from-amount').value = '';
+        
+        // Update transaction history
+        updateTransactionStatus(tx.hash, 'Completed');
+        
+        // Refresh balance
+        refreshAccountInfo();
+        
+        showAlert('approve', 'Transfer from successful!', 'success');
+      } catch (error) {
+        console.error("Transfer from error:", error);
+        showAlert('approve', `Transfer from failed: ${parseError(error)}`, 'danger');
+      }
+    }
+
+    // Burn tokens
+    async function handleBurn() {
+      if (!state.contract) {
+        showAlert('burn', 'Please connect your wallet and set contract address first', 'danger');
+        return;
+      }
+      
+      const amount = document.getElementById('burn-amount').value;
+      
+      if (amount <= 0) {
+        showAlert('burn', 'Amount must be greater than 0', 'danger');
+        return;
+      }
+      
+      try {
+        // Convert amount to token units with proper decimals
+        const decimals = await state.contract.decimals();
+        const amountInWei = ethers.utils.parseUnits(amount.toString(), decimals);
+        
+        // Check balance first
+        const balance = await state.contract.balanceOf(state.userAddress);
+        if (balance.lt(amountInWei)) {
+          showAlert('burn', `Insufficient balance. You have ${ethers.utils.formatUnits(balance, decimals)} tokens.`, 'danger');
+          return;
+        }
+        
+        // Show pending alert
+        showAlert('burn', 'Transaction pending...', 'info');
+        
+        // Send transaction
+        const tx = await state.contract.burn(amountInWei);
+        
+        // Add to transaction history
+        addTransactionToHistory('Burn', state.userAddress, '0x0000000000000000000000000000000000000000', amount, 'Pending');
+        
+        // Wait for transaction to be mined
+        await tx.wait();
+        
+        // Clear form
+        document.getElementById('burn-amount').value = '';
+        
+        // Update transaction history
+        updateTransactionStatus(tx.hash, 'Completed');
+        
+        // Refresh balance and supply
+        refreshAccountInfo();
+        
+        showAlert('burn', 'Burn successful!', 'success');
+      } catch (error) {
+        console.error("Burn error:", error);
+        showAlert('burn', `Burn failed: ${parseError(error)}`, 'danger');
+      }
+    }
+
+    // Burn from
+    async function handleBurnFrom() {
+      if (!state.contract) {
+        showAlert('burn', 'Please connect your wallet and set contract address first', 'danger');
+        return;
+      }
+      
+      const from = document.getElementById('burn-from-address').value;
+      const amount = document.getElementById('burn-from-amount').value;
+      
+      if (!ethers.utils.isAddress(from)) {
+        showAlert('burn', 'Invalid address', 'danger');
+        return;
+      }
+      
+      if (amount <= 0) {
+        showAlert('burn', 'Amount must be greater than 0', 'danger');
+        return;
+      }
+      
+      try {
+        // Convert amount to token units with proper decimals
+        const decimals = await state.contract.decimals();
+        const amountInWei = ethers.utils.parseUnits(amount.toString(), decimals);
+        
+        // Check allowance first
+        const allowance = await state.contract.allowance(from, state.userAddress);
+        if (allowance.lt(amountInWei)) {
+          showAlert('burn', `Insufficient allowance. You are allowed to burn ${ethers.utils.formatUnits(allowance, decimals)} tokens.`, 'danger');
+          return;
+        }
+        
+        // Show pending alert
+        showAlert('burn', 'Transaction pending...', 'info');
+        
+        // Send transaction
+        const tx = await state.contract.burnFrom(from, amountInWei);
+        
+        // Add to transaction history
+        addTransactionToHistory('BurnFrom', from, '0x0000000000000000000000000000000000000000', amount, 'Pending');
+        
+        // Wait for transaction to be mined
+        await tx.wait();
+        
+        // Clear form
+        document.getElementById('burn-from-address').value = '';
+        document.getElementById('burn-from-amount').value = '';
+        
+        // Update transaction history
+        updateTransactionStatus(tx.hash, 'Completed');
+        
+        // Refresh balance and supply
+        refreshAccountInfo();
+        
+        showAlert('burn', 'Burn from successful!', 'success');
+      } catch (error) {
+        console.error("Burn from error:", error);
+        showAlert('burn', `Burn from failed: ${parseError(error)}`, 'danger');
+      }
+    }
+
+    // Pause contract
+    async function handlePause() {
+      if (!state.contract) {
+        showAlert('admin', 'Please connect your wallet and set contract address first', 'danger');
+        return;
+      }
+      
+      try {
+        // Check if contract is already paused
+        const paused = await state.contract.paused();
+        if (paused) {
+          showAlert('admin', 'Contract is already paused', 'info');
+          return;
+        }
+        
+        // Show pending alert
+        showAlert('admin', 'Transaction pending...', 'info');
+        
+        // Send transaction
+        const tx = await state.contract.pause();
+        
+        // Wait for transaction to be mined
+        await tx.wait();
+        
+        // Refresh contract status
+        refreshAccountInfo();
+        
+        showAlert('admin', 'Contract paused successfully!', 'success');
+      } catch (error) {
+        console.error("Pause error:", error);
+        showAlert('admin', `Failed to pause contract: ${parseError(error)}`, 'danger');
+      }
+    }
+
+    // Unpause contract
+    async function handleUnpause() {
+      if (!state.contract) {
+        showAlert('admin', 'Please connect your wallet and set contract address first', 'danger');
+        return;
+      }
+      
+      try {
+        // Check if contract is already active
+        const paused = await state.contract.paused();
+        if (!paused) {
+          showAlert('admin', 'Contract is already active', 'info');
+          return;
+        }
+        
+        // Show pending alert
+        showAlert('admin', 'Transaction pending...', 'info');
+        
+        // Send transaction
+        const tx = await state.contract.unpause();
+        
+        // Wait for transaction to be mined
+        await tx.wait();
+        
+        // Refresh contract status
+        refreshAccountInfo();
+        
+        showAlert('admin', 'Contract unpaused successfully!', 'success');
+      } catch (error) {
+        console.error("Unpause error:", error);
+        showAlert('admin', `Failed to unpause contract: ${parseError(error)}`, 'danger');
+      }
+    }
+
+    // Helper function to show alerts
+    function showAlert(panel, message, type) {
+      const alertContainer = document.getElementById(`${panel}-alert-container`);
+      const alertElement = document.createElement('div');
+      alertElement.className = `alert alert-${type}`;
+      alertElement.textContent = message;
+      
+      // Clear previous alerts
+      alertContainer.innerHTML = '';
+      alertContainer.appendChild(alertElement);
+      
+      // Auto dismiss after 5 seconds for success messages
+      if (type === 'success') {
+        setTimeout(() => {
+          alertElement.remove();
+        }, 5000);
+      }
+    }
+
+    // Helper function to add transaction to history
+    function addTransactionToHistory(type, from, to, amount, status) {
+      const tbody = document.getElementById('tx-table-body');
+      
+      // Create a new row
+      const tr = document.createElement('tr');
+      tr.setAttribute('data-tx', Date.now().toString()); // Use timestamp as ID for now
+      
+      tr.innerHTML = `
+        <td>${type}</td>
+        <td>${shortenAddress(from)}</td>
+        <td>${shortenAddress(to)}</td>
+        <td>${amount}</td>
+        <td>${status}</td>
+      `;
+      
+      // Add to the top of the table
+      if (tbody.firstChild) {
+        tbody.insertBefore(tr, tbody.firstChild);
+      } else {
+        tbody.appendChild(tr);
+      }
+      
+      // Limit to 10 transactions
+      if (tbody.children.length > 10) {
+        tbody.removeChild(tbody.lastChild);
+      }
+    }
+
+    // Helper function to update transaction status
+    function updateTransactionStatus(txHash, status) {
+      // In a real implementation, you'd use the txHash to find the right row
+      // For this demo, we'll update the most recent transaction
+      const tbody = document.getElementById('tx-table-body');
+      if (tbody.firstChild) {
+        const statusCell = tbody.firstChild.lastChild;
+        statusCell.textContent = status;
+      }
+    }
+
+    // Helper function to shorten addresses
+    function shortenAddress(address) {
+      if (!address) return '-';
+      return address.substring(0, 6) + '...' + address.substring(address.length - 4);
+    }
+
+    // Helper function to parse error messages
+    function parseError(error) {
+      if (error.reason) return error.reason;
+      if (error.message) {
+        // Extract message from ethers error format
+        const match = error.message.match(/reason="([^"]+)"/);
+        if (match && match[1]) return match[1];
+        
+        return error.message;
+      }
+      return 'Unknown error';
+    }
+
+    // Initialize app
+    window.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>
