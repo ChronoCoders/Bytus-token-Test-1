@@ -1,0 +1,22 @@
+# Create a .gitignore file
+cat > .gitignore << 'EOL'
+# Hardhat
+artifacts/
+cache/
+node_modules/
+
+# Environment variables
+.env
+
+# IDE files
+.vscode/
+.idea/
+
+# Logs
+*.log
+EOL
+
+# Add and commit the .gitignore file
+git add .gitignore
+git commit -m "Add .gitignore file"
+git push
